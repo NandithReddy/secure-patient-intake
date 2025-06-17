@@ -1,0 +1,30 @@
+/* src/index.css */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Ensure the root container spans full width and remove centering flex behavior */
+body {
+  /* removed display:flex and place-items:center to allow full-width layout */
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+/* Portrait vs landscape padding */
+@media (orientation: portrait) {
+  .py-4 {
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+  }
+}
+
+@media (orientation: landscape) {
+  .py-4 {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+  }
+}
