@@ -17,9 +17,9 @@ describe('Patient Intake Flow', () => {
 
     // 2) Create a new patient
     cy.contains('+ Add Patient').click();
-    cy.get('input[placeholder="Full Name"]').type('Test Patient');
+    cy.get('input[aria-label="Full Name"]').type('Test Patient');
     cy.get('input[type="date"]').type('1980-01-01');
-    cy.get('input[placeholder="SSN"]').type('123-45-6789');
+    cy.get('input[aria-label="SSN"]').type('123-45-6789');
     cy.contains('button', 'Save Patient').click();
     cy.contains('Patient created');
 
@@ -27,7 +27,7 @@ describe('Patient Intake Flow', () => {
     cy.contains('Test Patient').parents('tr').within(() => {
       cy.contains('Edit').click();
     });
-    cy.get('input[placeholder="Full Name"]').clear().type('Test Patient X');
+    cy.get('input[aria-label="Full Name"]').clear().type('Test Patient X');
     cy.contains('button', 'Update Patient').click();
     cy.contains('Patient updated');
     cy.contains('Test Patient X');
