@@ -68,4 +68,4 @@ npm run dev
 ---
 
 ## Author
-Senior Engineer Coding Exercise
+Nandith Reddy
