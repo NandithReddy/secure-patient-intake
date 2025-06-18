@@ -1,42 +1,75 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
+/* Set a subtle background and ensure full viewport coverage */
+body {
+  background: #f6f8fa;
+  min-height: 100vh;
+  margin: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* Main responsive container */
+.responsive-container {
+  min-height: calc(100vh - 56px); /* 56px is Bootstrap’s default Navbar height */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center; /* Center content horizontally */
+  box-sizing: border-box;
+  width: 100vw;
+  background: #fff;
+  border-radius: 1.2rem;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+  margin: 1.5rem auto;
   padding: 2rem;
-  text-align: center;
+  max-width: 98vw;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
+/* Card style for inner sections */
 .card {
-  padding: 2em;
+  background: #f9fafb;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 2rem 1.5rem;
+  margin: 1rem 0;
+  width: 100%;
+  max-width: 600px;
 }
 
-.read-the-docs {
-  color: #888;
+/* Headings and text */
+.responsive-container h1, .responsive-container h2 {
+  margin-top: 0;
+  color: #2d3748;
+}
+.responsive-container p {
+  color: #4a5568;
+  margin-bottom: 0;
+}
+
+/* Portrait: stack everything in a single column and shrink horizontal padding */
+@media (orientation: portrait) {
+  .responsive-container {
+    flex-direction: column;
+    padding: 1rem;
+    max-width: 98vw;
+  }
+  .card {
+    margin: 1rem 0;
+    width: 100%;
+    max-width: 98vw;
+  }
+}
+
+/* Landscape: allow a wider “max-width” and row layout if needed */
+@media (orientation: landscape) {
+  .responsive-container {
+    flex-direction: row;
+    padding: 2rem 4rem;
+    max-width: 1200px;
+    margin: 2rem auto;
+    gap: 2rem;
+  }
+  .card {
+    margin: 0 1rem;
+    width: 100%;
+    max-width: 500px;
+  }
 }

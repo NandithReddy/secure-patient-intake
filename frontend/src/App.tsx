@@ -1,12 +1,14 @@
-// src/App.tsx
+// App.tsx
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate, Outlet } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { Navbar, Container, Button, Row, Col } from 'react-bootstrap';
+import { Navbar, Container, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import './App.css';  // <-- import your responsive styles
 
+// Layout with persistent navbar
 const GuardedLayout = () => {
   const { user, logout } = useAuth();
   return (
@@ -14,8 +16,7 @@ const GuardedLayout = () => {
       <Navbar bg="dark" variant="dark" expand="lg" sticky="top">
         <Container fluid>
           <Navbar.Brand>Secure Patient Intake</Navbar.Brand>
-          <Navbar.Toggle aria-controls="responsive-navbar-nav" />
-          <Navbar.Collapse id="responsive-navbar-nav" className="justify-content-end">
+          <Navbar.Collapse className="justify-content-end">
             <Navbar.Text className="me-3 text-light">
               Signed in as: <strong>{user?.username}</strong>
             </Navbar.Text>
@@ -24,17 +25,18 @@ const GuardedLayout = () => {
         </Container>
       </Navbar>
 
-      <Container fluid className="py-4">
-        <Row className="justify-content-center">
-          <Col xs={12} md={10} lg={8} xl={6}>
-            <Outlet />
-          </Col>
-        </Row>
+      {/*  
+        - Always fills the remaining height  
+        - Adjusts padding & width depending on orientation  
+      */}
+      <Container fluid className="responsive-container">
+        <Outlet />
       </Container>
     </>
   );
 };
 
+// Checks auth before rendering
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const { user } = useAuth();
   return user ? children : <Navigate to="/login" replace />;
