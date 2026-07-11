@@ -151,6 +151,37 @@ def apply_redaction(text: str, spans: tuple[PhiSpan, ...]) -> str:
     return out
 
 
+import re as _re
+
+# Matches the placeholders apply_redaction() inserts, e.g. "[**NAME**]".
+_PLACEHOLDER_RE = _re.compile(r"\[\*\*[A-Z]+\*\*\]")
+
+
+def placeholder_regions(text: str) -> list[tuple[int, int]]:
+    """Character ranges occupied by redaction placeholders like [**NAME**]."""
+    return [(m.start(), m.end()) for m in _PLACEHOLDER_RE.finditer(text)]
+
+
+def residual_phi(text: str, spans: tuple[PhiSpan, ...]) -> tuple[PhiSpan, ...]:
+    """Real leaked PHI, excluding false positives inside redaction placeholders.
+
+    Re-running a statistical detector on already-redacted text is unreliable:
+    the text is now full of "[**NAME**]" markers the model never saw in
+    training, so it can flag a bracket or marker character as PHI. Those hits
+    are artifacts of our own placeholders, not leaked identifiers.
+
+    A span counts as a real leak only if it is NOT wholly contained in a
+    placeholder. A genuinely missed name sits in ordinary text, outside any
+    placeholder, so it still counts — this filter narrows false positives
+    without ever hiding a real leak.
+    """
+    regions = placeholder_regions(text)
+    return tuple(
+        s for s in spans
+        if not any(r0 <= s.start and s.end <= r1 for r0, r1 in regions)
+    )
+
+
 def merge_spans(spans: tuple[PhiSpan, ...] | list[PhiSpan]) -> list[PhiSpan]:
     """Union overlapping/adjacent spans, keeping the longest span's category.
 

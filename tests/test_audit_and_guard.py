@@ -118,3 +118,36 @@ class TestEgressGuard:
 
         with pytest.raises(ValueError, match="off-machine"):
             EgressGuard(Offsite(), log)
+
+    def test_placeholder_false_positive_does_not_block(self, log):
+        """A detector that flags a bracket inside [**NAME**] must not block a
+        fully-redacted note. This reproduces a real bug: the transformer, run on
+        its own redaction markers, flagged the '[' of a placeholder as a name."""
+        from deid.types import PhiSpan, PhiCategory
+
+        redacted = "Patient: [**NAME**] seen on [**DATE**]."
+        bracket = redacted.index("[")  # first '[' of [**NAME**]
+
+        class FlagsABracket(RuleRedactor):
+            def find(self, text):
+                return (PhiSpan(bracket, bracket + 1, PhiCategory.NAME, "["),)
+
+        guard = EgressGuard(FlagsABracket(), log)
+        out = guard.send(redacted, destination="anthropic", fn=lambda t: "sent")
+        assert out == "sent"  # not blocked — the '[' is inside a placeholder
+
+    def test_real_name_next_to_a_placeholder_still_blocks(self, log):
+        """The placeholder filter must not hide a genuinely missed name."""
+        from deid.types import PhiSpan, PhiCategory
+
+        # "Reddy" was missed; "[**DATE**]" was redacted.
+        text = "Reddy seen on [**DATE**]."
+        start = text.index("Reddy")
+
+        class MissesAName(RuleRedactor):
+            def find(self, text):
+                return (PhiSpan(start, start + 5, PhiCategory.NAME, "Reddy"),)
+
+        guard = EgressGuard(MissesAName(), log)
+        with pytest.raises(PhiLeakBlocked, match="NAME"):
+            guard.send(text, destination="anthropic", fn=lambda t: "sent")
