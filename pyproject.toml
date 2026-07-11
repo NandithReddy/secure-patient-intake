@@ -1,0 +1,44 @@
+[project]
+name = "deid"
+version = "0.1.0"
+description = "PHI de-identification with a safety-weighted evaluation harness"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "pydantic>=2.9",
+    "bcrypt>=4.2",
+    "pyjwt>=2.9",
+    "python-multipart>=0.0.12",
+    "cryptography>=43.0",
+]
+
+[project.optional-dependencies]
+# The transformer redactor. Heavy; not needed to run the rule baseline or the service.
+ml = [
+    "torch>=2.4",
+    "transformers>=4.45",
+    "datasets>=3.0",
+    "accelerate>=1.0",
+    "seqeval>=1.2",
+]
+# The LLM redactor. Only used inside the eval harness, never on the serving path.
+llm = [
+    "anthropic>=0.40",
+]
+dev = [
+    "pytest>=8.3",
+]
+
+[project.scripts]
+deid = "deid.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["deid*", "service*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
