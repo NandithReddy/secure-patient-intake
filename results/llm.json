@@ -1,0 +1,95 @@
+{
+  "redactor": "llm:claude-opus-4-8",
+  "notes": 50,
+  "leak_rate": 0.0,
+  "char_recall": 1.0,
+  "gold_spans": 1150,
+  "fully_missed_spans": 0,
+  "missed_by_category": {},
+  "hallucinated_spans": 0,
+  "strict": {
+    "tp": 1057,
+    "fp": 150,
+    "fn": 93,
+    "precision": 0.8757,
+    "recall": 0.9191,
+    "f1": 0.8969,
+    "f2": 0.9101
+  },
+  "partial": {
+    "tp": 1150,
+    "fp": 57,
+    "fn": 0,
+    "precision": 0.9528,
+    "recall": 1.0,
+    "f1": 0.9758,
+    "f2": 0.9902
+  },
+  "per_category": {
+    "AGE": {
+      "tp": 50,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "f2": 1.0
+    },
+    "CONTACT": {
+      "tp": 100,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "f2": 1.0
+    },
+    "DATE": {
+      "tp": 200,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "f2": 1.0
+    },
+    "ID": {
+      "tp": 100,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "f2": 1.0
+    },
+    "LOCATION": {
+      "tp": 350,
+      "fp": 4,
+      "fn": 0,
+      "precision": 0.9887,
+      "recall": 1.0,
+      "f1": 0.9943,
+      "f2": 0.9977
+    },
+    "NAME": {
+      "tp": 300,
+      "fp": 53,
+      "fn": 0,
+      "precision": 0.8499,
+      "recall": 1.0,
+      "f1": 0.9188,
+      "f2": 0.9659
+    },
+    "PROFESSION": {
+      "tp": 50,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "f2": 1.0
+    }
+  },
+  "mean_latency_ms": 4535.92,
+  "total_cost_usd": 0.7591
+}

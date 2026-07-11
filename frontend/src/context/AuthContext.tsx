@@ -1,42 +1,71 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+/* The original version of this file authenticated in the browser against a
+ * hardcoded array:
+ *
+ *   const users = [{ username: 'admin', password: 'admin123', role: 'admin' }, ...]
+ *
+ * Every password shipped inside the JavaScript bundle, and `login()` returned a
+ * boolean that any user could flip in a debugger. Authentication now happens on
+ * the server and this context holds only a token and the identity the server
+ * hands back.
+ */
+import {
+  createContext, useCallback, useContext, useEffect, useMemo, useState,
+} from "react";
+import { api, token as tokenStore, type Role } from "../api";
 
 interface User {
+  id: number;
   username: string;
-  role: 'admin' | 'clinician';
+  role: Role;
 }
 
-interface AuthContextType {
+interface AuthValue {
   user: User | null;
-  login: (username: string, password: string) => boolean;
+  loading: boolean;
+  login: (u: string, p: string) => Promise<void>;
   logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType>({} as AuthContextType);
+const AuthContext = createContext<AuthValue | null>(null);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = (username: string, password: string): boolean => {
-    // mock users
-    const users = [
-      { username: 'admin', password: 'admin123', role: 'admin' },
-      { username: 'clinician', password: 'clinician123', role: 'clinician' }
-    ];
-    const found = users.find(u => u.username === username && u.password === password);
-    if (found) {
-      setUser({ username: found.username, role: found.role });
-      return true;
+  // A token in localStorage is a claim, not proof — it may be expired or signed
+  // with a rotated secret. Ask the server who we are before trusting it.
+  useEffect(() => {
+    if (!tokenStore.get()) {
+      setLoading(false);
+      return;
     }
-    return false;
-  };
+    api
+      .me()
+      .then(setUser)
+      .catch(() => tokenStore.clear())
+      .finally(() => setLoading(false));
+  }, []);
 
-  const logout = () => setUser(null);
+  const login = useCallback(async (username: string, password: string) => {
+    const res = await api.login(username, password);
+    tokenStore.set(res.access_token);
+    setUser(await api.me());
+  }, []);
 
-  return (
-    <AuthContext.Provider value={{ user, login, logout }}>
-      {children}
-    </AuthContext.Provider>
+  const logout = useCallback(() => {
+    tokenStore.clear();
+    setUser(null);
+  }, []);
+
+  const value = useMemo(
+    () => ({ user, loading, login, logout }),
+    [user, loading, login, logout],
   );
-};
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
 
-export const useAuth = () => useContext(AuthContext);
+export function useAuth(): AuthValue {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");
+  return ctx;
+}

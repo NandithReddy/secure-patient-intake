@@ -1,0 +1,99 @@
+{
+  "redactor": "rules",
+  "notes": 50,
+  "leak_rate": 0.20806,
+  "char_recall": 0.79194,
+  "gold_spans": 1150,
+  "fully_missed_spans": 292,
+  "missed_by_category": {
+    "LOCATION": 192,
+    "NAME": 50,
+    "PROFESSION": 50
+  },
+  "hallucinated_spans": 0,
+  "strict": {
+    "tp": 850,
+    "fp": 58,
+    "fn": 300,
+    "precision": 0.9361,
+    "recall": 0.7391,
+    "f1": 0.826,
+    "f2": 0.7716
+  },
+  "partial": {
+    "tp": 858,
+    "fp": 50,
+    "fn": 292,
+    "precision": 0.9449,
+    "recall": 0.7461,
+    "f1": 0.8338,
+    "f2": 0.7789
+  },
+  "per_category": {
+    "AGE": {
+      "tp": 50,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "f2": 1.0
+    },
+    "CONTACT": {
+      "tp": 100,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "f2": 1.0
+    },
+    "DATE": {
+      "tp": 200,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "f2": 1.0
+    },
+    "ID": {
+      "tp": 100,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "f2": 1.0
+    },
+    "LOCATION": {
+      "tp": 158,
+      "fp": 0,
+      "fn": 192,
+      "precision": 1.0,
+      "recall": 0.4514,
+      "f1": 0.622,
+      "f2": 0.5071
+    },
+    "NAME": {
+      "tp": 250,
+      "fp": 50,
+      "fn": 50,
+      "precision": 0.8333,
+      "recall": 0.8333,
+      "f1": 0.8333,
+      "f2": 0.8333
+    },
+    "PROFESSION": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 50,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "f2": 0.0
+    }
+  },
+  "mean_latency_ms": 0.18,
+  "total_cost_usd": 0.0
+}

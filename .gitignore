@@ -1,0 +1,46 @@
+# ---------------------------------------------------------------------------
+# The n2c2 corpus must NEVER be committed.
+#
+# Its Data Use Agreement states that "under no circumstances are copies of any
+# data files to be provided to additional individuals or posted to other
+# websites, including GitHub."
+#
+# Everything under data/ is ignored, and the loader reads from there by
+# convention. If you point --n2c2-dir somewhere else, make sure that path is
+# ignored too.
+# ---------------------------------------------------------------------------
+data/
+*.xml
+!frontend/**/*.xml
+
+# Trained checkpoints: large, and derived from restricted data.
+models/
+*.safetensors
+*.bin
+
+# Audit logs contain no PHI by construction, but they are runtime state.
+*.jsonl
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+
+# Node
+node_modules/
+frontend/dist/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+.idea/
+*.swp

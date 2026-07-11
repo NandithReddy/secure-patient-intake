@@ -1,0 +1,151 @@
+/* Design tokens.
+ *
+ * Categorical slots and status colors are taken from a palette validated with
+ * the six-checks validator: light-mode worst adjacent CVD ΔE 47.2, dark 41.3.
+ * Two light-mode hues (aqua, yellow) sit below 3:1 against the light surface,
+ * which triggers the relief rule — every bar in this app carries a visible
+ * direct label and every chart has a table view. That is an obligation, not a
+ * stylistic choice.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* Surfaces */
+  --surface-0: #f4f3f0;
+  --surface-1: #fcfcfb;
+  --surface-2: #ffffff;
+  --surface-sunken: #eceae5;
+  --border: #dedbd4;
+  --border-strong: #c3bfb5;
+
+  /* Ink */
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #86847d;
+
+  /* Categorical (fixed order, never cycled) */
+  --series-1: #2a78d6; /* blue    — rules */
+  --series-2: #1baf7a; /* aqua    — transformer */
+  --series-3: #eda100; /* yellow  — llm */
+
+  /* Sequential (blue ramp) */
+  --seq-250: #86b6ef;
+  --seq-450: #2a78d6;
+  --seq-600: #184f95;
+
+  /* Status — reserved. Never a series color. Always with icon + label. */
+  --good: #0ca30c;
+  --warning: #fab219;
+  --serious: #ec835a;
+  --critical: #d03b3b;
+
+  /* De-emphasis */
+  --recessive: #b9b6ae;
+  --grid: #e6e3dc;
+
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px -12px rgb(0 0 0 / 0.14);
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  --sans: "Inter var", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface-0: #111110;
+    --surface-1: #1a1a19;
+    --surface-2: #222220;
+    --surface-sunken: #0c0c0b;
+    --border: #33322f;
+    --border-strong: #4a4945;
+
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #8a8981;
+
+    --series-1: #3987e5;
+    --series-2: #199e70;
+    --series-3: #c98500;
+
+    --seq-250: #184f95;
+    --seq-450: #3987e5;
+    --seq-600: #86b6ef;
+
+    --recessive: #4a4945;
+    --grid: #2b2a28;
+  }
+}
+
+/* The viewer's explicit toggle must win over the OS signal in both directions. */
+:root[data-theme="dark"] {
+  --surface-0: #111110;
+  --surface-1: #1a1a19;
+  --surface-2: #222220;
+  --surface-sunken: #0c0c0b;
+  --border: #33322f;
+  --border-strong: #4a4945;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted: #8a8981;
+  --series-1: #3987e5;
+  --series-2: #199e70;
+  --series-3: #c98500;
+  --seq-250: #184f95;
+  --seq-450: #3987e5;
+  --seq-600: #86b6ef;
+  --recessive: #4a4945;
+  --grid: #2b2a28;
+}
+
+:root[data-theme="light"] {
+  --surface-0: #f4f3f0;
+  --surface-1: #fcfcfb;
+  --surface-2: #ffffff;
+  --surface-sunken: #eceae5;
+  --border: #dedbd4;
+  --border-strong: #c3bfb5;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #86847d;
+  --series-1: #2a78d6;
+  --series-2: #1baf7a;
+  --series-3: #eda100;
+  --seq-250: #86b6ef;
+  --seq-450: #2a78d6;
+  --seq-600: #184f95;
+  --recessive: #b9b6ae;
+  --grid: #e6e3dc;
+}
+
+/* PHI category hues, used only for span highlighting in the studio. These are
+ * intentionally low-saturation washes — the text on top must stay readable. */
+:root {
+  --phi-NAME: #2a78d6;
+  --phi-DATE: #4a3aa7;
+  --phi-ID: #d03b3b;
+  --phi-CONTACT: #eb6834;
+  --phi-LOCATION: #1baf7a;
+  --phi-AGE: #eda100;
+  --phi-PROFESSION: #e87ba4;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  background: var(--surface-0);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "tnum" 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
