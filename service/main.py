@@ -357,9 +357,10 @@ def redact(body: RedactRequest, user: CurrentUser) -> RedactResponse:
                        text=s.text) for s in spans],
         counts=counts,
         latency_ms=round(elapsed, 3),
-        # Re-inspect the *output*: if the detector still finds PHI in its own
-        # redaction, something is very wrong and the guard would block it.
-        safe_to_transmit=not detector.find(redacted),
+        # Re-inspect the *output* through the guard, which ignores the detector's
+        # false positives on its own [**NAME**] markers. Any span left here is a
+        # genuinely incomplete redaction.
+        safe_to_transmit=not guard.inspect(redacted),
     )
 
 

@@ -24,7 +24,7 @@ from typing import Callable, TypeVar
 
 from .audit import AuditLog
 from .redactors.base import BaseRedactor
-from .types import PhiSpan
+from .types import PhiSpan, residual_phi
 
 T = TypeVar("T")
 
@@ -57,7 +57,15 @@ class EgressGuard:
         self.audit = audit
 
     def inspect(self, text: str) -> tuple[PhiSpan, ...]:
-        return self.detector.find(text)
+        """PHI that would block egress.
+
+        On raw text this is just the detector's output (there are no
+        placeholders to filter). On already-redacted text it drops false
+        positives the detector produces on its own "[**NAME**]" markers — see
+        residual_phi. It never removes a span sitting in real content, so a
+        genuinely incomplete redaction still blocks.
+        """
+        return residual_phi(text, self.detector.find(text))
 
     def send(
         self,
