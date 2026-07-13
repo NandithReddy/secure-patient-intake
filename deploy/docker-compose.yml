@@ -1,0 +1,33 @@
+# The backend, in one container. No domain, no HTTPS here on purpose:
+# Vercel sits in front and proxies API calls to this server over its plain IP,
+# so the browser only ever talks to Vercel's HTTPS. See DEPLOY.md.
+#
+# Run from this folder with:  docker compose up -d --build
+# Values come from a .env file next to this one (see .env.example).
+
+services:
+  backend:
+    build:
+      context: ..              # repo root — the Dockerfile copies deid/ and service/
+      dockerfile: deploy/Dockerfile
+    restart: unless-stopped
+    environment:
+      DEID_ENV: production
+      DEID_JWT_SECRET: ${DEID_JWT_SECRET}
+      DEID_FIELD_KEY: ${DEID_FIELD_KEY}
+      # Not needed with the Vercel proxy — the browser reaches the API
+      # same-origin through Vercel, so requests aren't cross-origin. Harmless
+      # to leave empty.
+      DEID_CORS_ORIGINS: ${DEID_CORS_ORIGINS:-}
+    volumes:
+      # The trained model, mounted read-only from the host. NOT baked into the
+      # image (it is gitignored and large). Put it on the VPS at ../models.
+      - ../models:/app/models:ro
+      # Database + audit log in a named volume so they SURVIVE restarts/rebuilds.
+      - deid-data:/app/data
+    ports:
+      # Public on the VPS IP. Vercel proxies to http://<vps-ip>:8000.
+      - "8000:8000"
+
+volumes:
+  deid-data:
