@@ -1,0 +1,9 @@
+{
+  "$comment": "Vercel forwards every /api/* request from the website to the backend on the VPS. The browser only sees Vercel's HTTPS; Vercel makes the plain-IP call server-side, so no domain or certificate is needed on the server. Replace YOUR_VPS_IP with your Hetzner server's IP address.",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "http://YOUR_VPS_IP:8000/api/:path*"
+    }
+  ]
+}

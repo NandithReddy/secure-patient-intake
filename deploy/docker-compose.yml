@@ -1,6 +1,8 @@
-# Two containers: the FastAPI backend, and Caddy in front of it for HTTPS.
-# Run from this folder with:  docker compose up -d --build
+# The backend, in one container. No domain, no HTTPS here on purpose:
+# Vercel sits in front and proxies API calls to this server over its plain IP,
+# so the browser only ever talks to Vercel's HTTPS. See DEPLOY.md.
 #
+# Run from this folder with:  docker compose up -d --build
 # Values come from a .env file next to this one (see .env.example).
 
 services:
@@ -13,33 +15,19 @@ services:
       DEID_ENV: production
       DEID_JWT_SECRET: ${DEID_JWT_SECRET}
       DEID_FIELD_KEY: ${DEID_FIELD_KEY}
-      DEID_CORS_ORIGINS: ${DEID_CORS_ORIGINS}
+      # Not needed with the Vercel proxy — the browser reaches the API
+      # same-origin through Vercel, so requests aren't cross-origin. Harmless
+      # to leave empty.
+      DEID_CORS_ORIGINS: ${DEID_CORS_ORIGINS:-}
     volumes:
-      # The trained model, mounted read-only from the host. It is NOT baked into
-      # the image (it is gitignored and large). Put it on the VPS at ../models.
+      # The trained model, mounted read-only from the host. NOT baked into the
+      # image (it is gitignored and large). Put it on the VPS at ../models.
       - ../models:/app/models:ro
-      # The database and audit log live in a named volume so they SURVIVE
-      # restarts and rebuilds. Never bind this to the repo — it is real data.
+      # Database + audit log in a named volume so they SURVIVE restarts/rebuilds.
       - deid-data:/app/data
-    expose:
-      - "8000"                 # internal only; Caddy is the public entrance
-
-  caddy:
-    image: caddy:2
-    restart: unless-stopped
-    depends_on:
-      - backend
     ports:
-      - "80:80"
-      - "443:443"
-    environment:
-      BACKEND_DOMAIN: ${BACKEND_DOMAIN}
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy-data:/data       # stores the HTTPS certificates (must persist)
-      - caddy-config:/config
+      # Public on the VPS IP. Vercel proxies to http://<vps-ip>:8000.
+      - "8000:8000"
 
 volumes:
   deid-data:
-  caddy-data:
-  caddy-config:
