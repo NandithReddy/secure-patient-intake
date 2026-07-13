@@ -23,6 +23,7 @@ encrypted at rest, so the database file alone discloses nothing.
 
 from __future__ import annotations
 
+import os
 import time
 import uuid
 from pathlib import Path
@@ -81,9 +82,18 @@ app = FastAPI(
     description="PHI de-identification with a measured trust boundary.",
     version="0.1.0",
 )
+# Which frontends may call this API. In production, set DEID_CORS_ORIGINS to the
+# Vercel URL (comma-separated for more than one), e.g.
+#   DEID_CORS_ORIGINS=https://secure-patient-intake.vercel.app
+# Defaults to the local dev server so nothing breaks on a laptop.
+_ORIGINS = os.environ.get(
+    "DEID_CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173"
+)
+ALLOWED_ORIGINS = [o.strip() for o in _ORIGINS.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

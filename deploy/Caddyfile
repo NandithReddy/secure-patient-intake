@@ -1,0 +1,7 @@
+# Caddy gives the backend automatic, free HTTPS. It obtains and renews a
+# Let's Encrypt certificate for BACKEND_DOMAIN on its own — no certbot, no
+# manual certificate files. All it needs is the domain pointing at this server
+# and ports 80/443 open.
+{$BACKEND_DOMAIN} {
+	reverse_proxy backend:8000
+}
