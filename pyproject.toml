@@ -42,3 +42,6 @@ include = ["deid*", "service*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# scripts/ is deliberately not a package (see packages.find above), but the
+# adversarial eval set lives there and the tests import it.
+pythonpath = ["."]
