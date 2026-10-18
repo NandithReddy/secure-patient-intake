@@ -1,0 +1,104 @@
+{
+  "redactor": "rules",
+  "data": "adversarial",
+  "notes": 5,
+  "leak_rate": 0.98266,
+  "char_recall": 0.01734,
+  "gold_spans": 74,
+  "fully_missed_spans": 68,
+  "missed_by_category": {
+    "AGE": 3,
+    "CONTACT": 6,
+    "DATE": 9,
+    "ID": 11,
+    "LOCATION": 17,
+    "NAME": 17,
+    "PROFESSION": 5
+  },
+  "hallucinated_spans": 0,
+  "strict": {
+    "tp": 3,
+    "fp": 3,
+    "fn": 71,
+    "precision": 0.5,
+    "recall": 0.0405,
+    "f1": 0.075,
+    "f2": 0.0497
+  },
+  "partial": {
+    "tp": 6,
+    "fp": 0,
+    "fn": 68,
+    "precision": 1.0,
+    "recall": 0.0811,
+    "f1": 0.15,
+    "f2": 0.0993
+  },
+  "per_category": {
+    "AGE": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 3,
+      "precision": 1.0,
+      "recall": 0.5,
+      "f1": 0.6667,
+      "f2": 0.5556
+    },
+    "CONTACT": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 6,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "f2": 0.0
+    },
+    "DATE": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 9,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "f2": 0.0
+    },
+    "ID": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 11,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "f2": 0.0
+    },
+    "LOCATION": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 17,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "f2": 0.0
+    },
+    "NAME": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 17,
+      "precision": 1.0,
+      "recall": 0.15,
+      "f1": 0.2609,
+      "f2": 0.1807
+    },
+    "PROFESSION": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "f2": 0.0
+    }
+  },
+  "mean_latency_ms": 0.35,
+  "total_cost_usd": 0.0
+}

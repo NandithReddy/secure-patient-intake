@@ -1,39 +1,39 @@
 {
   "redactor": "transformer:deid-roberta",
   "notes": 50,
-  "leak_rate": 0.0,
-  "char_recall": 1.0,
+  "leak_rate": 0.00037,
+  "char_recall": 0.99963,
   "gold_spans": 1150,
   "fully_missed_spans": 0,
   "missed_by_category": {},
   "hallucinated_spans": 0,
   "strict": {
-    "tp": 1150,
-    "fp": 0,
-    "fn": 0,
-    "precision": 1.0,
-    "recall": 1.0,
-    "f1": 1.0,
-    "f2": 1.0
+    "tp": 1148,
+    "fp": 3,
+    "fn": 2,
+    "precision": 0.9974,
+    "recall": 0.9983,
+    "f1": 0.9978,
+    "f2": 0.9981
   },
   "partial": {
-    "tp": 1150,
-    "fp": 0,
-    "fn": 0,
-    "precision": 1.0,
-    "recall": 1.0,
-    "f1": 1.0,
-    "f2": 1.0
+    "tp": 1149,
+    "fp": 2,
+    "fn": 1,
+    "precision": 0.9983,
+    "recall": 0.9991,
+    "f1": 0.9987,
+    "f2": 0.999
   },
   "per_category": {
     "AGE": {
-      "tp": 50,
+      "tp": 49,
       "fp": 0,
-      "fn": 0,
+      "fn": 1,
       "precision": 1.0,
-      "recall": 1.0,
-      "f1": 1.0,
-      "f2": 1.0
+      "recall": 0.98,
+      "f1": 0.9899,
+      "f2": 0.9839
     },
     "CONTACT": {
       "tp": 100,
@@ -82,14 +82,14 @@
     },
     "PROFESSION": {
       "tp": 50,
-      "fp": 0,
+      "fp": 2,
       "fn": 0,
-      "precision": 1.0,
+      "precision": 0.9615,
       "recall": 1.0,
-      "f1": 1.0,
-      "f2": 1.0
+      "f1": 0.9804,
+      "f2": 0.9921
     }
   },
-  "mean_latency_ms": 37.07,
+  "mean_latency_ms": 35.86,
   "total_cost_usd": 0.0
 }

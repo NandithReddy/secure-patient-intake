@@ -2,8 +2,8 @@
 """Adversarial evaluation set: notes engineered to maximize rule-baseline FNs.
 
 Five synthetic clinical notes whose PHI is placed specifically to fall through
-documented gaps in the twenty regexes of `deid/redactors/rules.py`, annotated
-as `PhiSpan` objects so the existing scorer can read them with no adapter:
+documented gaps in the regexes of `deid/redactors/rules.py`, annotated as
+`PhiSpan` objects so the existing scorer can read them with no adapter:
 
     from deid.eval import evaluate
     from scripts.generate_adversarial_spans import ADVERSARIAL_NOTES
@@ -23,6 +23,12 @@ quietly poisons every metric downstream, and one code path is far easier to
 keep correct than literal integers scattered through a table. `Note.__post_init__`
 then re-derives every span from the raw text and raises on any mismatch, so an
 incorrect offset cannot survive importing this module.
+
+Seventy-one of the seventy-four spans are baseline false negatives. The other
+three were, until this set exposed three age forms a regex can in fact handle
+(`58 years old`, `aged 58`, `58 y/o`). `rules.py` was extended to cover them
+rather than left weak to flatter the model, and those spans stay here with
+`expect="caught"`, so a regression in the new patterns fails `--check`.
 
 The annotations are deliberately non-overlapping. `_greedy_match` pairs gold to
 predicted one-to-one, so a nested gold span (`Van Oorschot` inside `Ignatia Van
@@ -45,7 +51,12 @@ held-out-vocabulary result the README reports.
     python scripts/generate_adversarial_spans.py               # span inventory
     python scripts/generate_adversarial_spans.py --check       # assert the FNs
     python scripts/generate_adversarial_spans.py --score \
-        --json-out results/adversarial_rules.json
+        --json-out results/adversarial/rules_adversarial.json
+
+Reports go in `results/adversarial/`, not `results/`. `scripts/report.py` and
+the dashboard both glob `results/*.json` and tabulate whatever they find as one
+comparison; these scores come from a different gold set and do not belong in
+that table.
 """
 
 from __future__ import annotations
@@ -236,10 +247,12 @@ _RAW: dict[str, list[tuple]] = {
          "STREET rule mandates a leading `\\d{1,5}\\s+` house number and a "
          "suffix from a closed list; a named thoroughfare with no number and "
          "the unlisted type `Terrace` fails on both counts."),
-        ('91', 0, 'AGE', 'AGE', 'miss',
-         "`(\\d{1,3})[-\\s]year[-\\s]old` requires `year` adjacent to `old`. The "
-         "plural `years old` puts `s` exactly where `[-\\s]` is demanded, so "
-         "the single most common spoken age form is invisible."),
+        ('91', 0, 'AGE', 'AGE', 'caught',
+         "Was a miss, and is the reason it no longer is. "
+         "`(\\d{1,3})[-\\s]year[-\\s]old` put `s` where `[-\\s]` was demanded, so "
+         "the plural -- the commonest spoken form -- was invisible. The pattern "
+         "is now `years?`; the span stays so a regression flips it back and "
+         "fails the check."),
         ('kill-floor hand', 0, 'PROFESSION', 'PROFESSION', 'miss',
          "No PROFESSION rule exists (recall 0.000). The occupation is also "
          "periphrastic -- a trade named by its work surface, not by an "
@@ -279,10 +292,11 @@ _RAW: dict[str, list[tuple]] = {
          "`Patient`. The near-universal EHR header `Patient Name:` inserts a "
          "token before the colon, so the anchor never fires and the full name "
          "is published."),
-        ('72', 0, 'AGE', 'AGE', 'miss',
-         "The AGE rule is a single post-posed construction "
-         "`N[-\\s]year[-\\s]old`. The pre-posed `aged N` form contains no "
-         "`year`/`old` material to anchor on."),
+        ('72', 0, 'AGE', 'AGE', 'caught',
+         "Was a miss: the AGE rule was a single post-posed "
+         "`N[-\\s]year[-\\s]old` with nothing to anchor a pre-posed `aged N`. A "
+         "`\\baged\\s+(\\d{1,3})\\b` pattern was added in response and this span "
+         "now guards it."),
         ('Duskwater Hollow Infirmary', 0, 'LOCATION', 'HOSPITAL', 'miss',
          "HOSPITAL's final-keyword alternation is a closed six-item list. "
          "`Infirmary` -- like Institute, Pavilion, Health System, Hospice, "
@@ -352,10 +366,10 @@ _RAW: dict[str, list[tuple]] = {
          "A dot-delimited health-plan ID escapes the SSN rule (hyphens) and "
          "IPADDR, which requires three dot-terminated groups and `\\d{1,3}` "
          "last; here the final group is `1183A`."),
-        ('84', 0, 'AGE', 'AGE', 'miss',
-         "`[-\\s]year[-\\s]old` cannot express the `y/o` abbreviation, which is "
-         "how age is written in most real charts. The slash is not in either "
-         "character class and `year`/`old` are absent entirely."),
+        ('84', 0, 'AGE', 'AGE', 'caught',
+         "Was a miss: `[-\\s]year[-\\s]old` cannot express the `y/o` "
+         "abbreviation most real charts use. Covered now by "
+         "`(?:y/o|y\\.o\\.)`, and retained to keep that cover honest."),
         ('20210314', 0, 'DATE', 'DATE', 'miss',
          "Compact YYYYMMDD has no delimiters for any of the five date patterns "
          "to key on, and the 8-digit run offers no internal `\\b` for the ZIP "
@@ -369,6 +383,11 @@ _RAW: dict[str, list[tuple]] = {
          "Parkway, Highway, Loop, Row and Pike. The house number and "
          "capitalization are textbook; only the thoroughfare type is outside "
          "the closed set."),
+        ('Elmsbury', 0, 'LOCATION', 'CITY', 'miss',
+         "The city sits between an annotated street and an annotated ZIP and "
+         "is reached by neither: STREET stops at its suffix list and ZIP wants "
+         "five digits. Found by the transformer flagging it while this file "
+         "still scored it a false positive -- see results/adversarial/."),
         ('2139', 0, 'LOCATION', 'ZIP', 'miss',
          "`\\b\\d{5}(?:-\\d{4})?\\b` fixes the width at 5. A leading-zero-stripped "
          "ZIP -- routine after a spreadsheet round-trip -- is 4 digits and drops "

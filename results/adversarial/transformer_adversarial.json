@@ -1,0 +1,98 @@
+{
+  "redactor": "transformer:deid-roberta",
+  "data": "adversarial",
+  "notes": 5,
+  "leak_rate": 0.11679,
+  "char_recall": 0.88321,
+  "gold_spans": 74,
+  "fully_missed_spans": 1,
+  "missed_by_category": {
+    "NAME": 1
+  },
+  "hallucinated_spans": 0,
+  "strict": {
+    "tp": 45,
+    "fp": 77,
+    "fn": 29,
+    "precision": 0.3689,
+    "recall": 0.6081,
+    "f1": 0.4592,
+    "f2": 0.5383
+  },
+  "partial": {
+    "tp": 63,
+    "fp": 59,
+    "fn": 11,
+    "precision": 0.5164,
+    "recall": 0.8514,
+    "f1": 0.6429,
+    "f2": 0.7536
+  },
+  "per_category": {
+    "AGE": {
+      "tp": 5,
+      "fp": 3,
+      "fn": 1,
+      "precision": 0.625,
+      "recall": 0.8333,
+      "f1": 0.7143,
+      "f2": 0.7812
+    },
+    "CONTACT": {
+      "tp": 3,
+      "fp": 7,
+      "fn": 3,
+      "precision": 0.3,
+      "recall": 0.5,
+      "f1": 0.375,
+      "f2": 0.4412
+    },
+    "DATE": {
+      "tp": 8,
+      "fp": 4,
+      "fn": 1,
+      "precision": 0.6667,
+      "recall": 0.8889,
+      "f1": 0.7619,
+      "f2": 0.8333
+    },
+    "ID": {
+      "tp": 11,
+      "fp": 8,
+      "fn": 0,
+      "precision": 0.5789,
+      "recall": 1.0,
+      "f1": 0.7333,
+      "f2": 0.873
+    },
+    "LOCATION": {
+      "tp": 16,
+      "fp": 25,
+      "fn": 1,
+      "precision": 0.3902,
+      "recall": 0.9412,
+      "f1": 0.5517,
+      "f2": 0.7339
+    },
+    "NAME": {
+      "tp": 16,
+      "fp": 8,
+      "fn": 4,
+      "precision": 0.6667,
+      "recall": 0.8,
+      "f1": 0.7273,
+      "f2": 0.7692
+    },
+    "PROFESSION": {
+      "tp": 4,
+      "fp": 4,
+      "fn": 1,
+      "precision": 0.5,
+      "recall": 0.8,
+      "f1": 0.6154,
+      "f2": 0.7143
+    }
+  },
+  "mean_latency_ms": 71.47,
+  "total_cost_usd": 0.0
+}
