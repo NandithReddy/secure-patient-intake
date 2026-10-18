@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# Vercel CLI writes project ids here, and .env.local gets an OIDC token.
+.vercel
+.env*
+# A nested .gitignore overrides the root's negation, so repeat it here or a
+# future frontend/.env.example is silently ignored.
+!.env.example
