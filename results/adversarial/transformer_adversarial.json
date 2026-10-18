@@ -1,0 +1,100 @@
+{
+  "redactor": "transformer:deid-roberta-agevar",
+  "data": "adversarial",
+  "notes": 5,
+  "leak_rate": 0.17883,
+  "char_recall": 0.82117,
+  "gold_spans": 74,
+  "fully_missed_spans": 8,
+  "missed_by_category": {
+    "AGE": 4,
+    "NAME": 3,
+    "PROFESSION": 1
+  },
+  "hallucinated_spans": 0,
+  "strict": {
+    "tp": 36,
+    "fp": 70,
+    "fn": 38,
+    "precision": 0.3396,
+    "recall": 0.4865,
+    "f1": 0.4,
+    "f2": 0.4478
+  },
+  "partial": {
+    "tp": 57,
+    "fp": 49,
+    "fn": 17,
+    "precision": 0.5377,
+    "recall": 0.7703,
+    "f1": 0.6333,
+    "f2": 0.709
+  },
+  "per_category": {
+    "AGE": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 5,
+      "precision": 1.0,
+      "recall": 0.1667,
+      "f1": 0.2857,
+      "f2": 0.2
+    },
+    "CONTACT": {
+      "tp": 3,
+      "fp": 4,
+      "fn": 3,
+      "precision": 0.4286,
+      "recall": 0.5,
+      "f1": 0.4615,
+      "f2": 0.4839
+    },
+    "DATE": {
+      "tp": 8,
+      "fp": 2,
+      "fn": 1,
+      "precision": 0.8,
+      "recall": 0.8889,
+      "f1": 0.8421,
+      "f2": 0.8696
+    },
+    "ID": {
+      "tp": 11,
+      "fp": 12,
+      "fn": 0,
+      "precision": 0.4783,
+      "recall": 1.0,
+      "f1": 0.6471,
+      "f2": 0.8209
+    },
+    "LOCATION": {
+      "tp": 16,
+      "fp": 22,
+      "fn": 1,
+      "precision": 0.4211,
+      "recall": 0.9412,
+      "f1": 0.5818,
+      "f2": 0.7547
+    },
+    "NAME": {
+      "tp": 16,
+      "fp": 9,
+      "fn": 4,
+      "precision": 0.64,
+      "recall": 0.8,
+      "f1": 0.7111,
+      "f2": 0.7619
+    },
+    "PROFESSION": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 3,
+      "precision": 1.0,
+      "recall": 0.4,
+      "f1": 0.5714,
+      "f2": 0.4545
+    }
+  },
+  "mean_latency_ms": 63.14,
+  "total_cost_usd": 0.0
+}

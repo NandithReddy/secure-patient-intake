@@ -11,11 +11,11 @@ That function assumed someone had already told it which field was an SSN. Here
 we do the harder and more realistic thing: find PHI in free text with no field
 labels to lean on.
 
-The baseline is deliberately *strong*. It handles five date formats, two phone
-formats, honorific-anchored names, labelled fields, street addresses, and
-hospital names. Beating a strawman proves nothing; the point is to show
-precisely where a well-built rule system hits a wall that no additional rules
-can climb.
+The baseline is deliberately *strong*. It handles five date formats, four age
+formats, two phone formats, honorific-anchored names, labelled fields, street
+addresses, and hospital names. Beating a strawman proves nothing; the point is
+to show precisely where a well-built rule system hits a wall that no additional
+rules can climb.
 
 Where it hits the wall: a surname in running prose. "Reddy has not been
 compliant" contains PHI. No pattern distinguishes it from "Fever has not been
@@ -68,7 +68,17 @@ _RULES: list[tuple[re.Pattern[str], PhiCategory, str, int]] = [
     (re.compile(rf"\b\d{{1,2}}\s+(?:{_MON})\s+\d{{2,4}}\b"), PhiCategory.DATE, "DATE", 0),
 
     # --- Age ---------------------------------------------------------------
-    (re.compile(r"\b(\d{1,3})[-\s]year[-\s]old\b", re.I), PhiCategory.AGE, "AGE", 1),
+    # Four surface forms, for the same reason there are five date formats: a
+    # single frame would make this a strawman. `years?` is the plural the
+    # original pattern missed -- "58 years old" put an `s` where `[-\s]` was
+    # demanded, which an adversarial note caught us on.
+    (re.compile(r"\b(\d{1,3})[-\s]years?[-\s]old\b", re.I), PhiCategory.AGE, "AGE", 1),
+    (re.compile(r"\b(\d{1,3})\s*(?:y/o|y\.o\.)\b", re.I), PhiCategory.AGE, "AGE", 1),
+    (re.compile(r"\baged\s+(\d{1,3})\b", re.I), PhiCategory.AGE, "AGE", 1),
+    (re.compile(r"\bin\s+(?:his|her|their)\s+([2-9]0s)\b", re.I), PhiCategory.AGE, "AGE", 1),
+    # Deliberately not covered, because no pattern can: "eighty-five",
+    # "octogenarian", "in her 97th year". Those need to know what a word
+    # means, which is the whole argument of this project.
 
     # --- Names: only where an honorific or a field label anchors them -------
     (re.compile(rf"\b(?:Mr|Mrs|Ms|Dr|Doctor)\.?\s+({_NAME})"),

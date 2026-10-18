@@ -1,43 +1,44 @@
 {
   "redactor": "rules",
   "notes": 50,
-  "leak_rate": 0.15996,
-  "char_recall": 0.84004,
+  "leak_rate": 0.17063,
+  "char_recall": 0.82937,
   "gold_spans": 1150,
-  "fully_missed_spans": 263,
+  "fully_missed_spans": 279,
   "missed_by_category": {
-    "LOCATION": 163,
+    "AGE": 17,
+    "LOCATION": 162,
     "NAME": 50,
     "PROFESSION": 50
   },
   "hallucinated_spans": 0,
   "strict": {
-    "tp": 887,
+    "tp": 871,
     "fp": 50,
-    "fn": 263,
-    "precision": 0.9466,
-    "recall": 0.7713,
-    "f1": 0.85,
-    "f2": 0.801
+    "fn": 279,
+    "precision": 0.9457,
+    "recall": 0.7574,
+    "f1": 0.8411,
+    "f2": 0.7888
   },
   "partial": {
-    "tp": 887,
+    "tp": 871,
     "fp": 50,
-    "fn": 263,
-    "precision": 0.9466,
-    "recall": 0.7713,
-    "f1": 0.85,
-    "f2": 0.801
+    "fn": 279,
+    "precision": 0.9457,
+    "recall": 0.7574,
+    "f1": 0.8411,
+    "f2": 0.7888
   },
   "per_category": {
     "AGE": {
-      "tp": 50,
+      "tp": 33,
       "fp": 0,
-      "fn": 0,
+      "fn": 17,
       "precision": 1.0,
-      "recall": 1.0,
-      "f1": 1.0,
-      "f2": 1.0
+      "recall": 0.66,
+      "f1": 0.7952,
+      "f2": 0.7082
     },
     "CONTACT": {
       "tp": 100,
@@ -67,13 +68,13 @@
       "f2": 1.0
     },
     "LOCATION": {
-      "tp": 187,
+      "tp": 188,
       "fp": 0,
-      "fn": 163,
+      "fn": 162,
       "precision": 1.0,
-      "recall": 0.5343,
-      "f1": 0.6965,
-      "f2": 0.5892
+      "recall": 0.5371,
+      "f1": 0.6989,
+      "f2": 0.5919
     },
     "NAME": {
       "tp": 250,
@@ -94,6 +95,6 @@
       "f2": 0.0
     }
   },
-  "mean_latency_ms": 0.19,
+  "mean_latency_ms": 0.27,
   "total_cost_usd": 0.0
 }

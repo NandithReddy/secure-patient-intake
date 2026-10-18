@@ -1,10 +1,11 @@
 """Guards for the adversarial evaluation set.
 
-The set is worth having only because every span in it is a *known* failure of
-`deid/redactors/rules.py`. Two things quietly destroy that: an offset that
-stops indexing the text it claims, and a regex patch that makes a note stop
-testing what it advertises. Neither raises on its own, so both are asserted
-here.
+The set is worth having only because the baseline's behaviour on every span in
+it is *known* -- 71 false negatives, and 3 that the set itself turned into
+catches by exposing age formats a regex can handle. Two things quietly destroy
+that: an offset that stops indexing the text it claims, and a regex change that
+makes a note stop testing what it advertises. Neither raises on its own, so
+both are asserted here.
 
 `test_truncated_name_captures_are_character_leaks` is the one to read. It is
 the same argument as `test_partial_redaction_is_a_leak` in test_metrics.py,
@@ -37,7 +38,7 @@ ALL_PLANTED = [(n.doc_id, p, s) for n in ADVERSARIAL_NOTES
 
 
 def _ids(pairs):
-    return [f"{doc}-{item.text if hasattr(item, 'text') else item}" for doc, item, *_ in pairs]
+    return [f"{doc_id}-{span.text}" for doc_id, span in pairs]
 
 
 # --- the offsets ----------------------------------------------------------
@@ -99,7 +100,7 @@ def test_occurrence_pinning_selects_the_intended_instance():
 
 @pytest.mark.parametrize("doc_id,planted,span", ALL_PLANTED,
                          ids=[f"{d}-{p.entity}" for d, p, _ in ALL_PLANTED])
-def test_planted_entity_still_evades_the_baseline(doc_id, planted, span):
+def test_planted_entity_matches_its_recorded_outcome(doc_id, planted, span):
     """A regression guard that fires in both directions.
 
     A "miss" that starts being caught means someone patched a regex and this
@@ -153,7 +154,7 @@ def test_baseline_leaks_nearly_everything_on_this_set():
     for note in ADVERSARIAL_NOTES:
         score(note.spans, redactor.find(note.text), len(note.text), report)
 
-    assert report.gold_spans == 73
+    assert report.gold_spans == 74
     assert report.leak_rate > 0.95, f"only {report.leak_rate:.2%} leaked"
     assert report.leak_rate > 0.2081, "no worse than the synthetic baseline"
     assert report.partial.recall < 0.1

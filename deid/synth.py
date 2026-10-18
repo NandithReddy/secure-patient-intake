@@ -180,6 +180,53 @@ def _date(rng: random.Random) -> tuple[str, str]:
     return f"{MONTHS[m - 1]} {y}", "month-year"
 
 
+_TENS = {2: "twenty", 3: "thirty", 4: "forty", 5: "fifty",
+         6: "sixty", 7: "seventy", 8: "eighty", 9: "ninety"}
+_UNITS = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+# Latinate bands, only for the decades where clinicians actually write them.
+# Below sixty the decade form ("in their 40s") is used instead; nobody charts
+# a "quinquagenarian".
+_AGE_BANDS = {6: "sexagenarian", 7: "septuagenarian", 8: "octogenarian"}
+
+
+def _number_words(n: int) -> str:
+    """Spell out 20-99. This generator never produces an age below 28."""
+    tens, unit = divmod(n, 10)
+    return f"{_TENS[tens]}-{_UNITS[unit]}" if unit else _TENS[tens]
+
+
+def _age(rng: random.Random) -> tuple[str, str, str, str]:
+    """Return (prefix, phi_value, suffix, style) for one age expression.
+
+    Six surface forms, for exactly the reason `_date()` has five: a generator
+    that emits a single frame teaches a model the frame rather than the
+    concept. This function used to emit only "{n}-year-old", and the model
+    trained on it scored AGE recall 1.000 on this corpus and 0.000 on every
+    age form in the adversarial set -- plural "years old", "y/o", "aged N",
+    written-out numbers and lexical bands were all invisible to it. See
+    results/adversarial/transformer_adversarial.json.
+
+    The PHI value is the age expression alone; the frame stays literal, so the
+    gold span never swallows "aged" or "-year-old".
+    """
+    n = rng.randint(28, 89)
+    style = rng.randint(0, 5)
+    if style == 1:
+        return "The patient is a ", str(n), " y/o ", "abbreviated"
+    if style == 2:
+        return "The patient is ", str(n), " years old, a ", "plural"
+    if style == 3:
+        return "The patient is aged ", str(n), ", a ", "pre-posed"
+    if style == 4:
+        return "The patient is a ", _number_words(n), "-year-old ", "written"
+    if style == 5:
+        band = _AGE_BANDS.get(n // 10)
+        if band is not None:
+            return "The patient is a ", band, " ", "lexical"
+        return "The patient is in their ", f"{n // 10}0s", ", a ", "decade-band"
+    return "The patient is a ", str(n), "-year-old ", "hyphenated"
+
+
 def generate_note(rng: random.Random, doc_id: str, vocab: Vocab = DEFAULT) -> Note:
     b = _Builder()
 
@@ -194,7 +241,7 @@ def generate_note(rng: random.Random, doc_id: str, vocab: Vocab = DEFAULT) -> No
     ssn = f"{rng.randint(100, 899)}-{rng.randint(10, 99)}-{rng.randint(1000, 9999)}"
     phone = f"({rng.randint(200, 989)}) {rng.randint(200, 999)}-{rng.randint(1000, 9999)}"
     email = f"{first.lower()}.{last.lower()}@example-health.org"
-    age = str(rng.randint(28, 89))
+    age_prefix, age, age_suffix, _age_style = _age(rng)
     profession = rng.choice(vocab.professions)
     admit, _ = _date(rng)
     followup, _ = _date(rng)
@@ -217,8 +264,8 @@ def generate_note(rng: random.Random, doc_id: str, vocab: Vocab = DEFAULT) -> No
     # Names appear here in prose, unmarked by any surrounding delimiter. This
     # is precisely what a rule-based redactor cannot reach.
     b.lit("HISTORY OF PRESENT ILLNESS\n")
-    b.lit("The patient is a ").phi(age, PhiCategory.AGE, "AGE")
-    b.lit("-year-old ").phi(profession, PhiCategory.PROFESSION, "PROFESSION")
+    b.lit(age_prefix).phi(age, PhiCategory.AGE, "AGE")
+    b.lit(age_suffix).phi(profession, PhiCategory.PROFESSION, "PROFESSION")
     b.lit(f" who presented with {complaint}, {qualifier}. ")
     male = rng.random() < 0.5
     honorific, subj, obj = ("Mr. ", "He", "him") if male else ("Ms. ", "She", "her")

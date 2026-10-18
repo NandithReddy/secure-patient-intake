@@ -1,6 +1,6 @@
 # Secure Patient Intake
 
-**A well-built rule-based PHI redactor leaves 20.81% of protected health information exposed. A fine-tuned token classifier leaves 0.00% — matching Claude Opus, at 120× the speed and zero cost, without any note leaving the machine. This project measures all three on one test set with one scorer.**
+**A well-built rule-based PHI redactor leaves 21.78% of protected health information exposed. A fine-tuned token classifier leaves 0.01%, at 100× the speed and zero cost, without any note leaving the machine. On a third set written specifically to attack both, the baseline leaks 98.27% and the model leaks 17.88% — which is the most useful number here, and the one that says what the other two are worth.**
 
 Hospitals are sitting on enormous quantities of clinical text and cannot use language models on any of it, because the text identifies patients. Before a note can go near a hosted model, the identifiers have to come out — and someone has to *prove* they came out. That proof is the hard part, and it is what this repository is about.
 
@@ -12,25 +12,25 @@ Same 50 held-out notes, same 1,150 gold spans, same scorer. **Only the detector 
 
 | Category | rules | fine-tuned | Δ recall |
 |---|---|---|---|
-| AGE | 1.000 | 1.000 | · |
 | CONTACT | 1.000 | 1.000 | · |
 | DATE | 1.000 | 1.000 | · |
 | ID | 1.000 | 1.000 | · |
-| **LOCATION** | 0.451 ⚠ | **1.000** | **+0.549** |
+| **AGE** | 0.680 ⚠ | **0.960** | **+0.280** |
+| **LOCATION** | 0.460 ⚠ | **1.000** | **+0.540** |
 | **NAME** | 0.833 ⚠ | **1.000** | **+0.167** |
 | **PROFESSION** | 0.000 ⚠ | **1.000** | **+1.000** |
 
 | | rules | fine-tuned |
 |---|---|---|
-| **Leak rate** | **20.81%** | **0.00%** |
-| F2 (recall-weighted) | 0.779 | 1.000 |
-| Precision (partial) | 0.945 | 1.000 |
-| Spans never detected | 292 / 1150 | 0 / 1150 |
-| Latency | 0.2 ms | 37.1 ms |
+| **Leak rate** | **21.78%** | **0.01%** |
+| F2 (recall-weighted) | 0.769 | 0.998 |
+| Precision (partial) | 0.944 | 0.997 |
+| Spans never detected | 305 / 1150 | 0 / 1150 |
+| Latency | 0.3 ms | 42.6 ms |
 
-The baseline's failures are not evenly spread. It has **perfect** recall on everything with a **format**, and **catastrophic** recall on everything that requires knowing what a word **means**.
+The baseline's failures are not evenly spread. It has **perfect** recall where a category has one canonical **format**, **partial** recall where a category has many surface forms, and **catastrophic** recall on everything that requires knowing what a word **means**.
 
-An SSN always looks like `123-45-6789`, so a regex catches it every time. But no pattern can tell you that `Whitfield` in *"Whitfield has not been compliant with her medication"* is a surname, while `Furosemide` in the next sentence is not. No pattern knows that `Hyderabad` is a city. No pattern knows that `schoolteacher` is an occupation, which HIPAA Safe Harbor treats as an identifier.
+An SSN always looks like `123-45-6789`, so a regex catches it every time. Age is the instructive middle case: the baseline implements four forms (`58-year-old`, `58 y/o`, `58 years old`, `aged 58`) and still misses `eighty-five` and `octogenarian`, which is why AGE sits at 0.680 and not 1.000. Every form a pattern can reach is implemented; the remainder needs to know what a word means. But no pattern can tell you that `Whitfield` in *"Whitfield has not been compliant with her medication"* is a surname, while `Furosemide` in the next sentence is not. No pattern knows that `Hyderabad` is a city. No pattern knows that `schoolteacher` is an occupation, which HIPAA Safe Harbor treats as an identifier.
 
 Those are questions about language, which is why the answer is a language model.
 
@@ -42,14 +42,39 @@ So we built a **held-out-vocabulary** test set: identical templates, PHI values 
 
 | Category | rules | fine-tuned | precision |
 |---|---|---|---|
-| LOCATION | 0.534 ⚠ | **1.000** | 0.970 |
-| NAME | 0.833 ⚠ | **1.000** | 1.000 |
-| PROFESSION | 0.000 ⚠ | **1.000** | 1.000 |
-| **Leak rate** | **16.00%** | **0.00%** | |
+| AGE | 0.660 ⚠ | **1.000** | 0.926 |
+| LOCATION | 0.537 ⚠ | **1.000** | 0.975 |
+| NAME | 0.833 ⚠ | **1.000** | 0.997 |
+| PROFESSION | 0.000 ⚠ | **1.000** | 0.980 |
+| **Leak rate** | **17.06%** | **0.01%** | |
 
-Recall holds at 1.000 on words it has never encountered. Precision on `LOCATION` slips from 1.000 to 0.970 — it over-redacts unfamiliar place names, which is the *correct* direction of error here: a false positive is a slightly duller note, a false negative is a disclosure.
+Recall holds at 1.000 on words it has never encountered. Precision slips a little across the board — 0.975 on `LOCATION`, 0.926 on `AGE` — because it over-redacts unfamiliar place names and age expressions, which is the *correct* direction of error here: a false positive is a slightly duller note, a false negative is a disclosure.
 
 That is generalization, not lookup. Reproduce it with `--data heldout`; results live in `results/heldout/`.
+
+### The templates were suspicious too, so we attacked them
+
+Swapping the vocabulary answers *"did it memorise a lexicon?"* and leaves a harder question open. The notes still say `Facility: ___` and `The patient is a ___`, and a model can lean on those positions without understanding a word.
+
+So there is a third set: five notes written as rushed dictation — all-caps transcription, `Patient Name:` and `PATIENT:` headers, `Last, First` order, `M.R.N.` with dots, PHI buried in running prose — carrying **74 annotated spans placed to fall through specific regex gaps**. It lives in `scripts/generate_adversarial_spans.py` and scores through the same harness as everything else.
+
+| | rules | fine-tuned |
+|---|---|---|
+| **Leak rate** | **98.27%** | **17.88%** |
+| Spans never detected | 68 / 74 | 8 / 74 |
+| Precision (partial) | 1.000 | 0.538 |
+
+**The thesis holds.** 98.27% → 17.88% is the argument of this repository surviving a distribution it was never trained on: recall of 1.000 on `ID`, 0.941 on `LOCATION`, 0.889 on `DATE` and 0.800 on `NAME`, in notes whose formatting shares almost nothing with the training templates.
+
+**And the 0.01% does not travel.** Precision falls from 0.997 to 0.538 — heavy over-redaction on unfamiliar prose, the right direction of error but a long way from the templated figure. `AGE` is sharper still: **0.167 recall here against 0.960 on the templates.** The generator emits six age forms and the model learned all of them *in the frame it was trained on*; move `58 years old` into `pt is 91 years old, retired kill-floor hand at the packing plant` and it is missed again. Format variety was not enough, because the frame was the cue.
+
+Finding that took writing notes whose only purpose was to break the thing. It is also what drove the one honest fix to the baseline: three of the age forms it missed (`58 y/o`, `58 years old`, `aged 58`) were plain pattern-matching, so `rules.py` was extended to cover them rather than left weak to flatter the model. The three spans stay in the set, recorded as catches, guarding the new patterns.
+
+```bash
+python scripts/generate_adversarial_spans.py --check     # assert every span's outcome
+python scripts/generate_adversarial_spans.py --score \
+    --redactor transformer --model-dir models/deid-roberta
+```
 
 > **Both numbers are measured on synthetic notes** (see [Data](#data)). The templates are fixed, so the model may still lean on positional cues (`Facility: ___`) that real clinical prose varies freely. Real notes have typos, abbreviations, and transcription noise. Treat 0.00% as evidence that *the pipeline and the harness are sound*, not as a claim about production performance. The n2c2 corpus is the real exam.
 
@@ -112,11 +137,13 @@ All three scored on the same 50 held-out notes, same 1,150 gold spans:
 
 | | runs where | leak rate | precision | latency | cost | hallucinated |
 |---|---|---|---|---|---|---|
-| `rules` | locally | 20.81% | 0.945 | 0.2 ms | free | 0 |
-| `llm` (Claude Opus 4.8) | **off-machine** | **0.00%** | 0.953 | 4,536 ms | $0.76 | 0 |
-| `transformer` (RoBERTa) | **locally** | **0.00%** | **1.000** | 37 ms | free | 0 |
+| `rules` | locally | 21.78% | 0.944 | 0.3 ms | free | 0 |
+| `llm` (Claude Opus 4.8) † | **off-machine** | **0.00%** | 0.953 | 4,536 ms | $0.76 | 0 |
+| `transformer` (RoBERTa) | **locally** | **0.01%** | **0.997** | 43 ms | free | 0 |
 
-This is the result that makes the architecture argument concrete. **The local fine-tuned model matches Claude Opus on recall — both reach 0.00% leak — and beats it on precision (1.000 vs 0.953), at roughly 120× the speed, zero marginal cost, and without a single byte of note text leaving the machine.**
+† **The LLM row was measured on the previous corpus generation**, before `AGE` gained six surface forms. Re-running it transmits note text off-machine and costs money, so the figure stands as recorded and is not strictly comparable to the two rows above it. Treat it as evidence that the semantic categories are learnable, which is all it was ever for.
+
+This is the result that makes the architecture argument concrete. **The local fine-tuned model is level with Claude Opus on recall — 0.01% against 0.00% leak — and ahead of it on precision (0.997 vs 0.953), at roughly 100× the speed, zero marginal cost, and without a single byte of note text leaving the machine.** The caveat in the footnote applies: the two were measured on different corpus generations.
 
 Read that carefully, because the honest reading is narrower than the triumphant one:
 
@@ -169,7 +196,7 @@ pip install -e '.[dev]'
 
 python -m deid.cli demo                     # redact one note, see exactly what leaked
 python -m deid.cli eval --redactor rules --json-out results/rules.json
-pytest                                      # 24 tests, mostly about metric honesty
+pytest                                      # 197 tests, mostly about metric honesty
 ```
 
 Run the app:
@@ -253,9 +280,11 @@ deid/
     llm.py            the benchmark arm (transmits off-machine)
   eval/metrics.py     leak rate, F2, strict/partial, per-category
   train.py            recall-weighted fine-tuning
+scripts/
+  generate_adversarial_spans.py   74 spans built to defeat rules.py
 service/              FastAPI: auth, patients, de-id, audit, benchmark
 frontend/             React: studio, benchmark, patients, audit trail
-tests/                24 tests, mostly about the metrics being honest
+tests/                197 tests, mostly about the metrics being honest
 ```
 
 ---
@@ -264,7 +293,7 @@ tests/                24 tests, mostly about the metrics being honest
 
 Stated plainly, because a portfolio project that pretends to be finished is less convincing than one that knows what it is.
 
-1. **Both numbers come from synthetic data.** The harness is real and the generalization check is real, but the corpus is a stand-in until DUA approval. The templates are fixed, so the model may lean on positional cues that real clinical prose varies freely. Real notes will score worse. **0.00% is not a production claim.**
+1. **Every number comes from synthetic data.** The harness is real and both generalization checks are real, but the corpus is a stand-in until DUA approval. The worry that the model leans on positional cues is no longer hypothetical — it is measured: `AGE` recall falls from 0.960 on the templates to 0.167 on dictation-style prose carrying the same age forms. Real notes will score worse than 0.01%. **0.01% is not a production claim; 17.88% is the closer one.**
 2. **The LLM arm has been run once, on synthetic data.** 50 notes, Claude Opus 4.8, $0.76. It confirms the semantic categories are learnable and gives the local model something to be measured against — but one run on templated notes is a sanity check, not a characterization. The real comparison is on n2c2.
 3. **No checkpoint is committed.** Train your own in ~3 minutes; weights derived from restricted data do not belong in a public repo.
 4. **`RECALL_FLOOR = 0.9` is a judgment call**, not a regulatory threshold. HIPAA does not specify a number. It is a defensible bar for a demo, not a compliance certification.

@@ -1,39 +1,39 @@
 {
-  "redactor": "transformer:deid-roberta",
+  "redactor": "transformer:deid-roberta-agevar",
   "notes": 50,
-  "leak_rate": 0.0,
-  "char_recall": 1.0,
+  "leak_rate": 0.00015,
+  "char_recall": 0.99985,
   "gold_spans": 1150,
   "fully_missed_spans": 0,
   "missed_by_category": {},
   "hallucinated_spans": 0,
   "strict": {
-    "tp": 1150,
-    "fp": 0,
-    "fn": 0,
-    "precision": 1.0,
-    "recall": 1.0,
-    "f1": 1.0,
-    "f2": 1.0
+    "tp": 1130,
+    "fp": 21,
+    "fn": 20,
+    "precision": 0.9818,
+    "recall": 0.9826,
+    "f1": 0.9822,
+    "f2": 0.9824
   },
   "partial": {
-    "tp": 1150,
-    "fp": 0,
-    "fn": 0,
-    "precision": 1.0,
-    "recall": 1.0,
-    "f1": 1.0,
-    "f2": 1.0
+    "tp": 1148,
+    "fp": 3,
+    "fn": 2,
+    "precision": 0.9974,
+    "recall": 0.9983,
+    "f1": 0.9978,
+    "f2": 0.9981
   },
   "per_category": {
     "AGE": {
-      "tp": 50,
-      "fp": 0,
-      "fn": 0,
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1": 1.0,
-      "f2": 1.0
+      "tp": 48,
+      "fp": 3,
+      "fn": 2,
+      "precision": 0.9412,
+      "recall": 0.96,
+      "f1": 0.9505,
+      "f2": 0.9562
     },
     "CONTACT": {
       "tp": 100,
@@ -90,6 +90,6 @@
       "f2": 1.0
     }
   },
-  "mean_latency_ms": 37.07,
+  "mean_latency_ms": 42.62,
   "total_cost_usd": 0.0
 }
