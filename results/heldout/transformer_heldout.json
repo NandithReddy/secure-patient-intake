@@ -1,39 +1,39 @@
 {
-  "redactor": "transformer:deid-roberta-agevar",
+  "redactor": "transformer:deid-roberta",
   "notes": 50,
-  "leak_rate": 0.00014,
-  "char_recall": 0.99986,
+  "leak_rate": 0.00062,
+  "char_recall": 0.99938,
   "gold_spans": 1150,
   "fully_missed_spans": 0,
   "missed_by_category": {},
   "hallucinated_spans": 0,
   "strict": {
-    "tp": 1126,
-    "fp": 39,
-    "fn": 24,
-    "precision": 0.9665,
-    "recall": 0.9791,
-    "f1": 0.9728,
-    "f2": 0.9766
+    "tp": 1144,
+    "fp": 9,
+    "fn": 6,
+    "precision": 0.9922,
+    "recall": 0.9948,
+    "f1": 0.9935,
+    "f2": 0.9943
   },
   "partial": {
-    "tp": 1150,
-    "fp": 15,
-    "fn": 0,
-    "precision": 0.9871,
-    "recall": 1.0,
-    "f1": 0.9935,
-    "f2": 0.9974
+    "tp": 1147,
+    "fp": 6,
+    "fn": 3,
+    "precision": 0.9948,
+    "recall": 0.9974,
+    "f1": 0.9961,
+    "f2": 0.9969
   },
   "per_category": {
     "AGE": {
-      "tp": 50,
-      "fp": 4,
-      "fn": 0,
-      "precision": 0.9259,
-      "recall": 1.0,
-      "f1": 0.9615,
-      "f2": 0.9843
+      "tp": 47,
+      "fp": 1,
+      "fn": 3,
+      "precision": 0.9792,
+      "recall": 0.94,
+      "f1": 0.9592,
+      "f2": 0.9476
     },
     "CONTACT": {
       "tp": 100,
@@ -64,32 +64,32 @@
     },
     "LOCATION": {
       "tp": 350,
-      "fp": 9,
+      "fp": 0,
       "fn": 0,
-      "precision": 0.9749,
+      "precision": 1.0,
       "recall": 1.0,
-      "f1": 0.9873,
-      "f2": 0.9949
+      "f1": 1.0,
+      "f2": 1.0
     },
     "NAME": {
       "tp": 300,
-      "fp": 1,
+      "fp": 0,
       "fn": 0,
-      "precision": 0.9967,
+      "precision": 1.0,
       "recall": 1.0,
-      "f1": 0.9983,
-      "f2": 0.9993
+      "f1": 1.0,
+      "f2": 1.0
     },
     "PROFESSION": {
       "tp": 50,
-      "fp": 1,
+      "fp": 5,
       "fn": 0,
-      "precision": 0.9804,
+      "precision": 0.9091,
       "recall": 1.0,
-      "f1": 0.9901,
-      "f2": 0.996
+      "f1": 0.9524,
+      "f2": 0.9804
     }
   },
-  "mean_latency_ms": 31.8,
+  "mean_latency_ms": 32.86,
   "total_cost_usd": 0.0
 }

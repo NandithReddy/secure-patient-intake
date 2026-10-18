@@ -38,7 +38,7 @@ def test_splits_are_disjoint():
 
 
 def test_baseline_test_split_is_50_notes():
-    """The published 20.81% figure was measured on exactly these notes."""
+    """The published 21.28% figure was measured on exactly these notes."""
     _, _, test = split(generate_corpus(200))
     assert len(test) == 50
     assert test[0].doc_id == "synth-0150"

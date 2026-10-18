@@ -195,36 +195,59 @@ def _number_words(n: int) -> str:
     return f"{_TENS[tens]}-{_UNITS[unit]}" if unit else _TENS[tens]
 
 
-def _age(rng: random.Random) -> tuple[str, str, str, str]:
-    """Return (prefix, phi_value, suffix, style) for one age expression.
+def _hpi_opening(rng: random.Random, profession: str, complaint: str,
+                 qualifier: str) -> tuple[list[tuple[str, str]], str]:
+    """Segments for the HPI's opening clause, as (kind, value) pairs.
 
-    Six surface forms, for exactly the reason `_date()` has five: a generator
-    that emits a single frame teaches a model the frame rather than the
-    concept. This function used to emit only "{n}-year-old", and the model
-    trained on it scored AGE recall 1.000 on this corpus and 0.000 on every
-    age form in the adversarial set -- plural "years old", "y/o", "aged N",
-    written-out numbers and lexical bands were all invisible to it. See
-    results/adversarial/transformer_adversarial.json.
+    `kind` is "lit", "age" or "prof"; the caller feeds each through
+    `_Builder.lit()` or `.phi()`, so this stays off the offset path.
 
-    The PHI value is the age expression alone; the frame stays literal, so the
-    gold span never swallows "aged" or "-year-old".
+    Eight openings, varying the *frame* and not just the age format. That
+    distinction is the whole reason this function exists. An earlier version
+    varied six age formats inside one fixed frame -- "The patient is a ___" --
+    and the model learned all six formats and still missed `91` in
+    `pt is 91 years old, retired kill-floor hand`: AGE recall 0.960 on these
+    templates against 0.167 on dictation-style prose. Varying the frames
+    instead, at the same training budget, took that 0.167 to 0.833. The format
+    was never the cue; the frame was. So these vary in capitalization, in
+    age/profession order, and in whether there is a finite verb at all.
     """
     n = rng.randint(28, 89)
-    style = rng.randint(0, 5)
+    words = _number_words(n)
+    band = _AGE_BANDS.get(n // 10)
+    decade = f"{n // 10}0s"
+    tail = f" who presented with {complaint}, {qualifier}. "
+    style = rng.randint(0, 7)
+
+    if style == 0:
+        return [("lit", "The patient is a "), ("age", str(n)),
+                ("lit", "-year-old "), ("prof", profession),
+                ("lit", tail)], "canonical"
     if style == 1:
-        return "The patient is a ", str(n), " y/o ", "abbreviated"
+        return [("lit", "pt is "), ("age", str(n)),
+                ("lit", " years old, a "), ("prof", profession),
+                ("lit", f", and presented with {complaint}, {qualifier}. ")], "dictated"
     if style == 2:
-        return "The patient is ", str(n), " years old, a ", "plural"
+        return [("age", str(n)), ("lit", " y/o "), ("prof", profession),
+                ("lit", f", presenting with {complaint}, {qualifier}. ")], "telegraphic"
     if style == 3:
-        return "The patient is aged ", str(n), ", a ", "pre-posed"
+        return [("lit", "This is a "), ("age", words), ("lit", "-year-old "),
+                ("prof", profession), ("lit", tail)], "written-out"
     if style == 4:
-        return "The patient is a ", _number_words(n), "-year-old ", "written"
+        return [("lit", "HPI: "), ("age", str(n)), ("lit", " y/o "),
+                ("prof", profession),
+                ("lit", f" with {complaint}, {qualifier}. ")], "headed"
     if style == 5:
-        band = _AGE_BANDS.get(n // 10)
-        if band is not None:
-            return "The patient is a ", band, " ", "lexical"
-        return "The patient is in their ", f"{n // 10}0s", ", a ", "decade-band"
-    return "The patient is a ", str(n), "-year-old ", "hyphenated"
+        return [("lit", "The patient, a "), ("prof", profession),
+                ("lit", " aged "), ("age", str(n)),
+                ("lit", f", presented with {complaint}, {qualifier}. ")], "prof-first"
+    if style == 6 and band is not None:
+        return [("lit", "An otherwise well "), ("age", band), ("lit", " "),
+                ("prof", profession),
+                ("lit", f", brought in with {complaint}, {qualifier}. ")], "band"
+    return [("lit", "Patient is in their "), ("age", decade),
+            ("lit", ", works as a "), ("prof", profession),
+            ("lit", f", and presented with {complaint}, {qualifier}. ")], "decade"
 
 
 def generate_note(rng: random.Random, doc_id: str, vocab: Vocab = DEFAULT) -> Note:
@@ -241,13 +264,13 @@ def generate_note(rng: random.Random, doc_id: str, vocab: Vocab = DEFAULT) -> No
     ssn = f"{rng.randint(100, 899)}-{rng.randint(10, 99)}-{rng.randint(1000, 9999)}"
     phone = f"({rng.randint(200, 989)}) {rng.randint(200, 999)}-{rng.randint(1000, 9999)}"
     email = f"{first.lower()}.{last.lower()}@example-health.org"
-    age_prefix, age, age_suffix, _age_style = _age(rng)
     profession = rng.choice(vocab.professions)
     admit, _ = _date(rng)
     followup, _ = _date(rng)
     dob, _ = _date(rng)
     complaint, qualifier = rng.choice(COMPLAINTS)
     med = rng.choice(MEDS)
+    opening, _opening_style = _hpi_opening(rng, profession, complaint, qualifier)
 
     # --- Header -------------------------------------------------------------
     b.lit("ADMISSION NOTE\n")
@@ -264,9 +287,13 @@ def generate_note(rng: random.Random, doc_id: str, vocab: Vocab = DEFAULT) -> No
     # Names appear here in prose, unmarked by any surrounding delimiter. This
     # is precisely what a rule-based redactor cannot reach.
     b.lit("HISTORY OF PRESENT ILLNESS\n")
-    b.lit(age_prefix).phi(age, PhiCategory.AGE, "AGE")
-    b.lit(age_suffix).phi(profession, PhiCategory.PROFESSION, "PROFESSION")
-    b.lit(f" who presented with {complaint}, {qualifier}. ")
+    for kind, value in opening:
+        if kind == "lit":
+            b.lit(value)
+        elif kind == "age":
+            b.phi(value, PhiCategory.AGE, "AGE")
+        else:
+            b.phi(value, PhiCategory.PROFESSION, "PROFESSION")
     male = rng.random() < 0.5
     honorific, subj, obj = ("Mr. ", "He", "him") if male else ("Ms. ", "She", "her")
     b.lit(honorific)

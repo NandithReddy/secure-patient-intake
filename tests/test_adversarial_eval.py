@@ -146,7 +146,7 @@ def test_truncated_name_captures_are_character_leaks():
 def test_baseline_leaks_nearly_everything_on_this_set():
     """The set's reason to exist, stated as a number.
 
-    The published baseline figures are 20.81% on synth and 16.00% on heldout.
+    The published baseline figures are 21.28% on synth and 15.67% on heldout.
     If this set ever scores in that range it has stopped being adversarial.
     """
     report = Report()
@@ -156,7 +156,7 @@ def test_baseline_leaks_nearly_everything_on_this_set():
 
     assert report.gold_spans == 74
     assert report.leak_rate > 0.95, f"only {report.leak_rate:.2%} leaked"
-    assert report.leak_rate > 0.2081, "no worse than the synthetic baseline"
+    assert report.leak_rate > 0.2128, "no worse than the synthetic baseline"
     assert report.partial.recall < 0.1
     assert report.hallucinated == 0
 
